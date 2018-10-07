@@ -1,5 +1,6 @@
 import socket
 import json
+
 def postUrl(verbose,url,headers, data):
     urlParsed = parseURL(url)
 
@@ -31,16 +32,19 @@ def parseURL(url):
 
 def parseReponse(pieces,verbose):
     iterator = iter(pieces.split("\n"))
+    flag = False
     headers = ""
     for line in iterator:
+        if line.find("300") or line.find("301") or line.find("302"):
+            flag = True
         headers += line+"\n"
         if not line.strip():  # empty line
             break
-
-    body = "\n".join(iterator)
-    if verbose:
-        print(headers)
-        print(body)
     else:
-        print(body)
+        body = "\n".join(iterator)
+        if verbose:
+            print(headers)
+            print(body)
+        else:
+            print(body)
 
