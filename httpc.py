@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 import sys
 import argparse
+from filehelper import getContent
 from get import getUrl
 from post import postUrl
-
+sys.dont_write_bytecode = True
 
 def checkContentType(js):
     for pair in js:
@@ -24,6 +25,7 @@ parser.add_argument("-v", "--verbosity", action="store_true",
                     help="increase output verbosity")
 parser.add_argument('-h',"--headers", nargs='*')
 parser.add_argument('-d', '--data', nargs ='*', help = "the data to pass as the post request")
+parser.add_argument('-f', '--files', nargs = '*', help = "Files to pass along the post request. Please place the file into this directory to pass it along an HTTP request")
 parser.add_argument('--help', action='help', help='show this help message and exit')
 parser.add_argument('url',help='url to do request upon')
 
@@ -34,6 +36,7 @@ requestType = args.request
 verbose = False
 parsed_headers = {}
 parsed_data = {}
+parsed_file_data = {}
 
 if args.verbosity:
             verbose = True
@@ -54,8 +57,15 @@ if args.data:
         print("Cannot use get with data. Please try this again with a post")
         quit()
     for pair in args.data:
+        print(args.data)
         key, value = pair.split(':')
         parsed_data[key] = value 
+
+if args.files:
+    if args.request == 'get':
+        print("Cannot use get with data. Please try this again with a post")
+        quit()
+    parsed_file_data = getContent(args.files)
 
 if rawUrl.startswith("http://www."):
     rawUrl = rawUrl[11:]
@@ -65,6 +75,6 @@ if rawUrl.startswith("www."):
 if requestType == 'get':
     getUrl(verbose,rawUrl,parsed_headers)
 elif requestType == 'post':
-    postUrl(verbose, rawUrl, parsed_headers, parsed_data)
+    postUrl(verbose, rawUrl, parsed_headers, parsed_data, parsed_file_data)
 
 
